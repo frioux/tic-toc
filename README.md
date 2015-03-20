@@ -10,3 +10,10 @@
 
  * Games (id)
  * Moves (id, game_id, x, y, player, timestamp)
+
+## Usage
+
+ * `plackup -Ilib -p 3001`
+ * `curl -v -X POST http://localhost:3001/`
+ * `curl -v -X PUT  http://lcoalhost:3001/$foo` -d 'x=0&y=0'
+ * `curl http://localhost:3001/$foo`
