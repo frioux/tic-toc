@@ -39,21 +39,31 @@ class TTT::Web extends Web::Simple::Application {
    method make_move($game, $x, $y) {
       # check for unique constraint violation
       try {
+         my $last_player = $game->last_player // 1;
+         my $current_player = 0+!$last_player;
+
          $self->schema->txn_do(sub {
 
-            # this will be undef the first time, which is fine
-            my $last_player = $game->last_player;
+            return $self->_forbidden('game already won')
+               if $game->has_winner;
+
+            return $self->_forbidden('game already over')
+               if $game->cat;
 
             $game->add_to_moves({
                x => $x,
                y => $y,
-               player => 0+!$last_player,
+               player => $current_player,
             });
+
          });
 
-         return [ 200, [ content_type => 'text/plain' ], ['good move!']];
+         return $self->_basic($self->_render_player($current_player) . ' won!')
+            if $game->has_winner;
+
+         return $self->_basic('good move!')
       } catch {
-         return [ 403, [ content_type => 'text/plain' ], ['that move is already taken']]
+         return $self->_forbidden('that move is already taken')
             if m/UNIQUE constraint failed: moves\.game_id, moves\.x, moves\.y/;
          die $_
       };
@@ -62,6 +72,12 @@ class TTT::Web extends Web::Simple::Application {
    method render_game($game) {
 
    }
+
+   method _render_player($player) { $player ? 'X' : 'O' }
+
+   method _forbidden($msg) { [ 403, [ content_type => 'text/plain' ], [$msg]] }
+
+   method _basic($msg) { [ 200, [ content_type => 'text/plain' ], [$msg]] }
 
 };
 
