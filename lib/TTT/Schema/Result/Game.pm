@@ -19,6 +19,8 @@ sub last_player {
    })->get_column('player')->single
 }
 
+sub current_player { 0+!(shift->last_player // 0) }
+
 sub has_winner ($self) {
    $self->moves->xs->winner || $self->moves->os->winner
 }
@@ -40,8 +42,8 @@ my %move_map = (
    '12' => 16,
 
    '20' => 24,
-   '21' => 28,
-   '22' => 30,
+   '21' => 26,
+   '22' => 28,
 );
 
 sub as_string ($self) {
@@ -53,7 +55,7 @@ sub as_string ($self) {
       " | | \n";
 
    for ($self->moves->all) {
-      substr $template, $move_map{$_->x . $_->y}, 1, $_->player ? 'O' : 'X'
+      substr $template, $move_map{$_->y . $_->x}, 1, $_->player ? 'X' : 'O'
    }
 
    return $template

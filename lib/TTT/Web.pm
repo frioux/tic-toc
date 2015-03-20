@@ -1,6 +1,5 @@
 use Moops;
 use TTT::Schema;
-use Try::Tiny;
 
 class TTT::Web extends Web::Simple::Application {
 
@@ -38,17 +37,14 @@ class TTT::Web extends Web::Simple::Application {
 
    method make_move($game, $x, $y) {
       # check for unique constraint violation
+      my $ret;
       try {
-         my $last_player = $game->last_player // 1;
-         my $current_player = 0+!$last_player;
+         my $current_player = $game->current_player;
 
          $self->schema->txn_do(sub {
 
-            return $self->_forbidden('game already won')
-               if $game->has_winner;
-
-            return $self->_forbidden('game already over')
-               if $game->cat;
+            $ret = $self->_forbidden('game already won'), return  if $game->has_winner;
+            $ret = $self->_forbidden('game already over'), return if $game->cat;
 
             $game->add_to_moves({
                x => $x,
@@ -58,8 +54,11 @@ class TTT::Web extends Web::Simple::Application {
 
          });
 
+         return $ret if $ret;
          return $self->_basic($self->_render_player($current_player) . ' won!')
             if $game->has_winner;
+
+         return $self->_basic('cat game.') if $game->cat;
 
          return $self->_basic('good move!')
       } catch {

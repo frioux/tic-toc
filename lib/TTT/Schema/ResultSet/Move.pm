@@ -41,9 +41,21 @@ sub diagonal_descending ($self) {
 }
 
 sub diagonal_ascending ($self) {
-   $self->search({
-      $self->me . y => \'-1 * x + 2'
-   })->count == 3
+   # the following SHOULD work, but I think SQLite is confused?
+   # $self->search({
+   #    $self->me . y => \'-x + 2'
+   # })->count == 3
+
+   $self->search([{
+      x => 0,
+      y => 2,
+   }, {
+      x => 1,
+      y => 1,
+   }, {
+      x => 2,
+      y => 0,
+   }])->count == 3;
 }
 
 sub winner ($self) {

@@ -11,7 +11,8 @@ use HTTP::Request;
 
 use TTT::Web;
 
-my $app = TTT::Web->new->to_psgi_app;
+my $inner = TTT::Web->new;
+my $app = $inner->to_psgi_app;
 
 #   0  1  2
 # 0  |  |
@@ -61,6 +62,16 @@ test_psgi
             'X', $cb, $game_url,
          );
       };
+      my $r = $cb->(HTTP::Request->new(GET => $game_url));
+      is(
+         $r->decoded_content,
+         "X|O| \n".
+         "-----\n".
+         "X| |O\n".
+         "-----\n".
+         "X| | \n",
+         'renders correctly',
+      );
    };
 
    subtest 'horizontal win' => sub {
@@ -85,9 +96,19 @@ test_psgi
             'X', $cb, $game_url,
          );
       };
+      my $r = $cb->(HTTP::Request->new(GET => $game_url));
+      is(
+         $r->decoded_content,
+         "X|X|X\n".
+         "-----\n".
+         "O| | \n".
+         "-----\n".
+         " |O| \n",
+         'renders correctly',
+      );
    };
 
-   subtest 'diagonal_ascending win' => sub {
+   subtest 'diagonal descending win' => sub {
       my $game_url;
 
       subtest 'new game' => sub {
@@ -109,10 +130,16 @@ test_psgi
             'O', $cb, $game_url,
          );
       };
-
       my $r = $cb->(HTTP::Request->new(GET => $game_url));
-      print $r->decoded_content;
-      exit;
+      is(
+         $r->decoded_content,
+         "O|X| \n".
+         "-----\n".
+         " |O|X\n".
+         "-----\n".
+         " |X|O\n",
+         'renders correctly',
+      );
    };
 
    subtest 'diagonal_descending win' => sub {
@@ -153,14 +180,14 @@ sub _expect_win ($moves, $player, $cb, $game_url) {
 
    my $final = pop @moves;
 
-   for (@$moves) {
+   for (@moves) {
       my $req = _xy($game_url, @$_);
 
       my $res = $cb->($req);
       ok($res->is_success, 'move made');
    }
 
-   my $req = _xy($game_url, 0, 2);
+   my $req = _xy($game_url, @$final);
 
    my $res = $cb->($req);
    ok($res->is_success, 'move made');
