@@ -109,6 +109,10 @@ test_psgi
             'O', $cb, $game_url,
          );
       };
+
+      my $r = $cb->(HTTP::Request->new(GET => $game_url));
+      print $r->decoded_content;
+      exit;
    };
 
    subtest 'diagonal_descending win' => sub {
