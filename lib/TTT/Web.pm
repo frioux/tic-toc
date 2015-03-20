@@ -69,9 +69,7 @@ class TTT::Web extends Web::Simple::Application {
       };
    }
 
-   method render_game($game) {
-
-   }
+   method render_game($game) { $self->_basic($game->as_string) }
 
    method _render_player($player) { $player ? 'X' : 'O' }
 

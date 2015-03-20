@@ -30,4 +30,33 @@ sub winner ($self) {
    die "no winner!"
 }
 
+my %move_map = (
+   '00' => 0,
+   '01' => 2,
+   '02' => 4,
+
+   '10' => 12,
+   '11' => 14,
+   '12' => 16,
+
+   '20' => 24,
+   '21' => 28,
+   '22' => 30,
+);
+
+sub as_string ($self) {
+   my $template =
+      " | | \n" .
+      "-----\n" .
+      " | | \n" .
+      "-----\n" .
+      " | | \n";
+
+   for ($self->moves->all) {
+      substr $template, $move_map{$_->x . $_->y}, 1, $_->player ? 'O' : 'X'
+   }
+
+   return $template
+}
+
 1;
