@@ -36,13 +36,16 @@ class TTT::Web extends Web::Simple::Application {
    }
 
    method make_move($game, $x, $y) {
+      my $valid = qr/^[012]$/;
+      return $self->_forbidden('invalid location')
+         unless $x =~ $valid && $y =~ $valid;
+
       # check for unique constraint violation
-      my $ret;
       try {
          my $current_player = $game->current_player;
+         my $ret;
 
          $self->schema->txn_do(sub {
-
             $ret = $self->_forbidden('game already won'), return  if $game->has_winner;
             $ret = $self->_forbidden('game already over'), return if $game->cat;
 
