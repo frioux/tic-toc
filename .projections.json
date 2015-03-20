@@ -1,0 +1,11 @@
+{
+   "lib/TTT/*.pm": {
+      "alternate": "t/{}.t",
+      "type": "module"
+   },
+   "t/*.t": {
+      "alternate": "t/TTT/{}.pm",
+      "type": "test"
+   }
+}
+

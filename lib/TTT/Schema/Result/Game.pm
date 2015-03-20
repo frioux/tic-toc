@@ -9,4 +9,12 @@ primary_column id => {
 
 has_many moves => '::Move', 'game_id';
 
+sub last_player {
+   shift->moves->search(undef, {
+      # assumes that the id always increments
+      order_by => { -desc => 'id' },
+      rows => 1,
+   })->get_column('player')->single
+}
+
 1;
